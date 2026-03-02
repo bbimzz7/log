@@ -2,3 +2,5 @@
 local TeleLogger = loadstring(game:HttpGet(
     "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/tele_logger.lua"
 ))()
+
+TeleLogger.Send("Nama Script Lo")
