@@ -4,15 +4,14 @@
 
     CARA PAKAI:
     local Blacklist = loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/UsernameLo/RepoLo/main/blacklist.lua"
+        "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/blacklist.lua"
     ))()
-    Blacklist.Check() -- taruh sebelum load script utama
-    Blacklist.StartLoop() -- taruh setelah script utama load
+    Blacklist.Check()
+    Blacklist.StartLoop()
 
-    FORMAT blacklist.txt di GitHub:
+    FORMAT blacklist.txt:
     # Komentar diawali tanda pagar
     123456789|Cheating
-    987654321|Spam
 ]]
 
 local Blacklist = {}
@@ -21,20 +20,20 @@ local Blacklist = {}
 -- CONFIG
 --------------------------------------------------
 
-local BLACKLIST_URL = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/blacklist.txt"
-local BOT_TOKEN     = "8672141972:AAGl0yGh16if3rm2EfplYfkruGLPwaW0bP4"
-local CHAT_ID       = "5488313125"
-local CHECK_INTERVAL = 60 -- cek ulang tiap 60 detik
-local OWNER_TG      = "@bimz"
+local BLACKLIST_URL  = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/blacklist.txt"
+local BOT_TOKEN      = "8672141972:AAGl0yGh16if3rm2EfplYfkruGLPwaW0bP4"
+local CHAT_ID        = "5488313125"
+local CHECK_INTERVAL = 60
+local OWNER_TG       = "@bimz"
 
 --------------------------------------------------
 -- SERVICES
 --------------------------------------------------
 
-local Players     = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
+local Players      = game:GetService("Players")
+local HttpService  = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
+local LocalPlayer  = Players.LocalPlayer
 
 --------------------------------------------------
 -- FETCH BLACKLIST
@@ -45,9 +44,8 @@ local function fetchBlacklist()
         return game:HttpGet(BLACKLIST_URL)
     end)
 
-    -- Gagal fetch = berhenti total
     if not ok or not result or result == "" then
-        error("[Blacklist] Gagal mengambil data blacklist. Script dihentikan.")
+        error("[Blacklist] Gagal fetch blacklist. Script dihentikan.")
     end
 
     local list = {}
@@ -69,15 +67,15 @@ end
 
 local function sendTelegram(reason)
     pcall(function()
-        local function getPing()
-            return math.floor(LocalPlayer:GetNetworkPing() * 1000) .. " ms"
-        end
-
         local function getGameName()
-            local ok, result = pcall(function()
+            local ok, r = pcall(function()
                 return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
             end)
-            return ok and result or "Unknown"
+            return ok and r or "Unknown"
+        end
+
+        local function getPing()
+            return math.floor(LocalPlayer:GetNetworkPing() * 1000) .. " ms"
         end
 
         local msg = string.format(
@@ -122,7 +120,7 @@ local function sendTelegram(reason)
 end
 
 --------------------------------------------------
--- BUAT GUI BLACKLIST
+-- GUI FULLSCREEN
 --------------------------------------------------
 
 local guiShown = false
@@ -131,170 +129,182 @@ local function showBlacklistGui(reason)
     if guiShown then return end
     guiShown = true
 
-    -- Hapus GUI lama kalau ada
     local existing = LocalPlayer.PlayerGui:FindFirstChild("BlacklistGui")
     if existing then existing:Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "BlacklistGui"
     ScreenGui.ResetOnSpawn = false
+    ScreenGui.IgnoreGuiInset = true
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = LocalPlayer.PlayerGui
 
-    -- Overlay gelap
-    local Overlay = Instance.new("Frame")
-    Overlay.Size = UDim2.new(1, 0, 1, 0)
-    Overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Overlay.BackgroundTransparency = 1
-    Overlay.BorderSizePixel = 0
-    Overlay.ZIndex = 1
-    Overlay.Parent = ScreenGui
+    -- Background hitam fullscreen
+    local BG = Instance.new("Frame")
+    BG.Size = UDim2.new(1, 0, 1, 0)
+    BG.Position = UDim2.new(0, 0, 0, 0)
+    BG.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
+    BG.BackgroundTransparency = 1
+    BG.BorderSizePixel = 0
+    BG.ZIndex = 1
+    BG.Parent = ScreenGui
 
-    -- Fade in overlay
-    TweenService:Create(Overlay, TweenInfo.new(0.4), {
-        BackgroundTransparency = 0.5
+    TweenService:Create(BG, TweenInfo.new(0.5), {
+        BackgroundTransparency = 0
     }):Play()
 
-    -- Container utama
+    -- Garis merah atas
+    local TopBar = Instance.new("Frame")
+    TopBar.Size = UDim2.new(1, 0, 0, 4)
+    TopBar.Position = UDim2.new(0, 0, 0, 0)
+    TopBar.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+    TopBar.BorderSizePixel = 0
+    TopBar.ZIndex = 2
+    TopBar.Parent = ScreenGui
+
+    -- Garis merah bawah
+    local BotBar = Instance.new("Frame")
+    BotBar.Size = UDim2.new(1, 0, 0, 4)
+    BotBar.Position = UDim2.new(0, 0, 1, -4)
+    BotBar.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+    BotBar.BorderSizePixel = 0
+    BotBar.ZIndex = 2
+    BotBar.Parent = ScreenGui
+
+    -- Container card di tengah
     local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(0, 360, 0, 260)
-    Container.Position = UDim2.new(0.5, -180, 0.5, -130)
-    Container.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    Container.Size = UDim2.new(0, 420, 0, 280)
+    Container.Position = UDim2.new(0.5, -210, 1.5, 0)
+    Container.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
     Container.BorderSizePixel = 0
-    Container.ZIndex = 2
+    Container.ZIndex = 3
     Container.Parent = ScreenGui
 
-    -- Animasi muncul dari bawah
-    Container.Position = UDim2.new(0.5, -180, 1, 0)
-    TweenService:Create(Container, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, -180, 0.5, -130)
-    }):Play()
-
-    -- Corner radius
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 12)
+    UICorner.CornerRadius = UDim.new(0, 14)
     UICorner.Parent = Container
 
-    -- Stroke border merah
     local UIStroke = Instance.new("UIStroke")
-    UIStroke.Color = Color3.fromRGB(200, 40, 40)
+    UIStroke.Color = Color3.fromRGB(200, 30, 30)
     UIStroke.Thickness = 1.5
     UIStroke.Parent = Container
 
+    -- Animasi container masuk setelah BG fade
+    task.delay(0.3, function()
+        TweenService:Create(Container, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0.5, -210, 0.5, -140)
+        }):Play()
+    end)
+
     -- Header merah
     local Header = Instance.new("Frame")
-    Header.Size = UDim2.new(1, 0, 0, 55)
-    Header.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+    Header.Size = UDim2.new(1, 0, 0, 60)
+    Header.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
     Header.BorderSizePixel = 0
-    Header.ZIndex = 3
+    Header.ZIndex = 4
     Header.Parent = Container
 
     local HeaderCorner = Instance.new("UICorner")
-    HeaderCorner.CornerRadius = UDim.new(0, 12)
+    HeaderCorner.CornerRadius = UDim.new(0, 14)
     HeaderCorner.Parent = Header
 
-    -- Fix corner bawah header
     local HeaderFix = Instance.new("Frame")
-    HeaderFix.Size = UDim2.new(1, 0, 0, 12)
-    HeaderFix.Position = UDim2.new(0, 0, 1, -12)
-    HeaderFix.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
+    HeaderFix.Size = UDim2.new(1, 0, 0, 14)
+    HeaderFix.Position = UDim2.new(0, 0, 1, -14)
+    HeaderFix.BackgroundColor3 = Color3.fromRGB(180, 25, 25)
     HeaderFix.BorderSizePixel = 0
-    HeaderFix.ZIndex = 3
+    HeaderFix.ZIndex = 4
     HeaderFix.Parent = Header
 
-    -- Icon + Title
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1, 0, 1, 0)
     Title.BackgroundTransparency = 1
     Title.Text = "You Are Blacklisted!"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 18
-    Title.ZIndex = 4
+    Title.TextSize = 20
+    Title.ZIndex = 5
     Title.Parent = Header
 
     -- Body
     local Body = Instance.new("Frame")
-    Body.Size = UDim2.new(1, 0, 1, -55)
-    Body.Position = UDim2.new(0, 0, 0, 55)
+    Body.Size = UDim2.new(1, 0, 1, -60)
+    Body.Position = UDim2.new(0, 0, 0, 60)
     Body.BackgroundTransparency = 1
-    Body.ZIndex = 3
+    Body.ZIndex = 4
     Body.Parent = Container
 
     local UIPadding = Instance.new("UIPadding")
-    UIPadding.PaddingLeft   = UDim.new(0, 20)
-    UIPadding.PaddingRight  = UDim.new(0, 20)
-    UIPadding.PaddingTop    = UDim.new(0, 16)
-    UIPadding.PaddingBottom = UDim.new(0, 16)
+    UIPadding.PaddingLeft   = UDim.new(0, 24)
+    UIPadding.PaddingRight  = UDim.new(0, 24)
+    UIPadding.PaddingTop    = UDim.new(0, 18)
+    UIPadding.PaddingBottom = UDim.new(0, 18)
     UIPadding.Parent = Body
 
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 10)
+    UIListLayout.Padding = UDim.new(0, 12)
     UIListLayout.Parent = Body
 
-    -- Fungsi buat label info
     local function makeRow(labelText, valueText, order)
         local Row = Instance.new("Frame")
-        Row.Size = UDim2.new(1, 0, 0, 28)
+        Row.Size = UDim2.new(1, 0, 0, 30)
         Row.BackgroundTransparency = 1
         Row.LayoutOrder = order
-        Row.ZIndex = 4
+        Row.ZIndex = 5
         Row.Parent = Body
 
         local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(0.38, 0, 1, 0)
+        Label.Size = UDim2.new(0.35, 0, 1, 0)
         Label.BackgroundTransparency = 1
         Label.Text = labelText
-        Label.TextColor3 = Color3.fromRGB(150, 150, 160)
+        Label.TextColor3 = Color3.fromRGB(130, 130, 145)
         Label.Font = Enum.Font.Gotham
-        Label.TextSize = 13
+        Label.TextSize = 14
         Label.TextXAlignment = Enum.TextXAlignment.Left
-        Label.ZIndex = 4
+        Label.ZIndex = 5
         Label.Parent = Row
 
         local Value = Instance.new("TextLabel")
-        Value.Size = UDim2.new(0.62, 0, 1, 0)
-        Value.Position = UDim2.new(0.38, 0, 0, 0)
+        Value.Size = UDim2.new(0.65, 0, 1, 0)
+        Value.Position = UDim2.new(0.35, 0, 0, 0)
         Value.BackgroundTransparency = 1
         Value.Text = valueText
-        Value.TextColor3 = Color3.fromRGB(235, 235, 235)
+        Value.TextColor3 = Color3.fromRGB(240, 240, 240)
         Value.Font = Enum.Font.GothamBold
-        Value.TextSize = 13
+        Value.TextSize = 14
         Value.TextXAlignment = Enum.TextXAlignment.Left
         Value.TextTruncate = Enum.TextTruncate.AtEnd
-        Value.ZIndex = 4
+        Value.ZIndex = 5
         Value.Parent = Row
     end
 
     makeRow("Username", LocalPlayer.Name, 1)
     makeRow("Reason", reason, 2)
 
-    -- Divider
     local Divider = Instance.new("Frame")
     Divider.Size = UDim2.new(1, 0, 0, 1)
-    Divider.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    Divider.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
     Divider.BorderSizePixel = 0
     Divider.LayoutOrder = 3
-    Divider.ZIndex = 4
+    Divider.ZIndex = 5
     Divider.Parent = Body
 
-    -- Contact label
     local Contact = Instance.new("TextLabel")
-    Contact.Size = UDim2.new(1, 0, 0, 28)
+    Contact.Size = UDim2.new(1, 0, 0, 30)
     Contact.BackgroundTransparency = 1
     Contact.Text = "Mau banding? Hubungi: " .. OWNER_TG
-    Contact.TextColor3 = Color3.fromRGB(100, 150, 255)
+    Contact.TextColor3 = Color3.fromRGB(80, 130, 255)
     Contact.Font = Enum.Font.Gotham
-    Contact.TextSize = 12
+    Contact.TextSize = 13
     Contact.TextXAlignment = Enum.TextXAlignment.Center
     Contact.LayoutOrder = 4
-    Contact.ZIndex = 4
+    Contact.ZIndex = 5
     Contact.Parent = Body
 end
 
 --------------------------------------------------
--- HENTIKAN SCRIPT TOTAL
+-- STOP CALLBACKS
 --------------------------------------------------
 
 local stopCallbacks = {}
@@ -304,14 +314,9 @@ function Blacklist.OnStop(callback)
 end
 
 local function killScript(reason)
-    -- Kirim notif telegram dulu
     sendTelegram(reason)
     task.wait(0.5)
-
-    -- Tampilkan GUI
     showBlacklistGui(reason)
-
-    -- Jalankan semua stop callback yang didaftarkan
     for _, cb in ipairs(stopCallbacks) do
         pcall(cb)
     end
@@ -322,9 +327,8 @@ end
 --------------------------------------------------
 
 local function checkAndAct()
-    local list = fetchBlacklist() -- error otomatis kalau gagal
+    local list   = fetchBlacklist()
     local userId = tostring(LocalPlayer.UserId)
-
     if list[userId] then
         return true, list[userId]
     end
@@ -332,23 +336,16 @@ local function checkAndAct()
 end
 
 --------------------------------------------------
--- CHECK (dipanggil sebelum script utama load)
+-- PUBLIC API
 --------------------------------------------------
 
 function Blacklist.Check()
     local isBlacklisted, reason = checkAndAct()
     if isBlacklisted then
         killScript(reason)
-        -- Stop eksekusi script utama
         error("[Blacklist] Akses ditolak: " .. reason)
     end
 end
-
---------------------------------------------------
--- START LOOP (dipanggil setelah script utama load)
--- Cek ulang tiap CHECK_INTERVAL detik
--- Kalau tiba-tiba kena blacklist saat main = langsung mati
---------------------------------------------------
 
 function Blacklist.StartLoop()
     task.spawn(function()
