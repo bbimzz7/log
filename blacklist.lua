@@ -21,7 +21,7 @@ local Blacklist = {}
 -- CONFIG
 --------------------------------------------------
 
-local BLACKLIST_URL = "https://raw.githubusercontent.com/UsernameLo/RepoLo/main/blacklist.txt"
+local BLACKLIST_URL = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/blacklist.txt"
 local BOT_TOKEN     = "8672141972:AAGl0yGh16if3rm2EfplYfkruGLPwaW0bP4"
 local CHAT_ID       = "5488313125"
 local CHECK_INTERVAL = 60 -- cek ulang tiap 60 detik
