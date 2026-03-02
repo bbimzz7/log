@@ -3,6 +3,7 @@
 # Format: UserID|Reason
 # Baris diawali # = komentar, diabaikan script
 # Contoh:
-# 123456789|Cheati
+# 123456789|Che
 
-5392733334|banir lu
+
+10278652817|goblok
