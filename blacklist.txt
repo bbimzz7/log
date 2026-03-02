@@ -5,3 +5,4 @@
 # Contoh:
 # 123456789|Cheating
 
+5392733334|bool
