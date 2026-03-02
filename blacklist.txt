@@ -4,4 +4,4 @@
 # Baris diawali # = komentar, diabaikan script
 # Contoh:
 # 123456789|Cheating
-
+# 5392733334|test
