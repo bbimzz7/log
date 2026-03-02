@@ -1,0 +1,7 @@
+# VertictHub - Blacklist Database
+# by @Bimz19
+# Format: UserID|Reason
+# Baris diawali # = komentar, diabaikan script
+# Contoh:
+# 123456789|Cheating
+
