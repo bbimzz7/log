@@ -20,7 +20,7 @@ local Blacklist = {}
 -- CONFIG
 --------------------------------------------------
 
-local BLACKLIST_URL  = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/blacklist.txt"
+local BLACKLIST_URL  = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/blacklist.txt?t=" .. os.time()
 local BOT_TOKEN      = "8672141972:AAGl0yGh16if3rm2EfplYfkruGLPwaW0bP4"
 local CHAT_ID        = "5488313125"
 local CHECK_INTERVAL = 60
@@ -123,7 +123,9 @@ end
 -- GUI FULLSCREEN
 --------------------------------------------------
 
-local guiShown = false
+local guiShown   = false
+local blacklisted = false
+local guiRef     = nil
 
 local function showBlacklistGui(reason)
     if guiShown then return end
@@ -138,6 +140,7 @@ local function showBlacklistGui(reason)
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = LocalPlayer.PlayerGui
+    guiRef = ScreenGui
 
     -- Background hitam fullscreen
     local BG = Instance.new("Frame")
@@ -347,13 +350,40 @@ function Blacklist.Check()
     end
 end
 
+local function hideBlacklistGui()
+    if guiRef then
+        guiRef:Destroy()
+        guiRef    = nil
+        guiShown  = false
+        blacklisted = false
+    end
+end
+
+local resumeCallbacks = {}
+
+function Blacklist.OnResume(callback)
+    table.insert(resumeCallbacks, callback)
+end
+
 function Blacklist.StartLoop()
     task.spawn(function()
         while task.wait(CHECK_INTERVAL) do
             local ok, isBlacklisted, reason = pcall(checkAndAct)
-            if ok and isBlacklisted then
+
+            if ok and isBlacklisted and not blacklisted then
+                -- Baru kena blacklist
+                blacklisted = true
                 killScript(reason)
-                break
+
+            elseif ok and not isBlacklisted and blacklisted then
+                -- Udah di-whitelist, hapus GUI & resume script
+                blacklisted = false
+                hideBlacklistGui()
+
+                -- Jalankan resume callbacks
+                for _, cb in ipairs(resumeCallbacks) do
+                    pcall(cb)
+                end
             end
         end
     end)
