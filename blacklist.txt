@@ -3,6 +3,6 @@
 # Format: UserID|Reason
 # Baris diawali # = komentar, diabaikan script
 # Contoh:
-# 123456789|Cheating
+# 123456789|Cheati
 
-5392733334|bool
+10278652817|testing ban
