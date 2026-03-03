@@ -304,7 +304,7 @@ local function showBlacklistGui(reason)
 end
 
 --------------------------------------------------
--- STOP CALLBACKS
+-- STOP CALLBACKS & KICK
 --------------------------------------------------
 
 local stopCallbacks = {}
@@ -314,24 +314,26 @@ function Blacklist.OnStop(callback)
 end
 
 local function killScript(reason)
-    -- 1. Kirim log ke Telegram terlebih dahulu
-    sendTelegram(reason)
-    task.wait(0.5)
-
-    -- 2. Coba tendang (Kick) pemain dari server game
-    pcall(function()
-        LocalPlayer:Kick("\n[VertictHub] You Are Blacklisted!\nReason: " .. reason .. "\n\nMau banding? Hubungi: " .. OWNER_TG)
+    -- 1. Kirim notif ke Telegram
+    task.spawn(function()
+        sendTelegram(reason)
+    end)
+    
+    -- 2. Tampilkan GUI merah sebagai cadangan kalau Anti-Kick di executor nyala
+    task.spawn(function()
+        showBlacklistGui(reason)
     end)
 
-    -- 3. FALLBACK (CADANGAN): Jika fungsi Kick diblokir oleh anti-kick mereka, kunci layarnya pakai GUI
-    showBlacklistGui(reason)
-    
-    -- 4. Matikan semua loop atau fitur script yang sedang berjalan
+    -- 3. Hentikan loop dari script lain
     for _, cb in ipairs(stopCallbacks) do
         pcall(cb)
     end
-end
 
+    task.wait(0.5)
+
+    -- 4. TENDANG PEMAIN (KICK)
+    LocalPlayer:Kick("\n[VertictHub] You Are Blacklisted!\nReason: " .. reason .. "\n\nHubungi: " .. OWNER_TG)
+end
 
 --------------------------------------------------
 -- CEK BLACKLIST
@@ -354,7 +356,8 @@ function Blacklist.Check()
     local isBlacklisted, reason = checkAndAct()
     if isBlacklisted then
         killScript(reason)
-        error("[Blacklist] Akses ditolak: " .. reason)
+        -- Ganti error() dengan jeda panjang agar kick sempat tereksekusi
+        task.wait(9e9) 
     end
 end
 
@@ -364,7 +367,8 @@ function Blacklist.StartLoop()
             local ok, isBlacklisted, reason = pcall(checkAndAct)
             if ok and isBlacklisted then
                 killScript(reason)
-                break
+                -- Ganti break dengan jeda panjang
+                task.wait(9e9)
             end
         end
     end)
