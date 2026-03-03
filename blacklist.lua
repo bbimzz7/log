@@ -24,7 +24,7 @@ local BLACKLIST_URL  = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads
 local BOT_TOKEN      = "8672141972:AAGl0yGh16if3rm2EfplYfkruGLPwaW0bP4"
 local CHAT_ID        = "5488313125"
 local CHECK_INTERVAL = 60
-local OWNER_TG       = "@bimz"
+local OWNER_TG       = "@Bimzzkyz"
 
 --------------------------------------------------
 -- SERVICES
