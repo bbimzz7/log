@@ -314,13 +314,24 @@ function Blacklist.OnStop(callback)
 end
 
 local function killScript(reason)
+    -- 1. Kirim log ke Telegram terlebih dahulu
     sendTelegram(reason)
     task.wait(0.5)
+
+    -- 2. Coba tendang (Kick) pemain dari server game
+    pcall(function()
+        LocalPlayer:Kick("\n[VertictHub] You Are Blacklisted!\nReason: " .. reason .. "\n\nMau banding? Hubungi: " .. OWNER_TG)
+    end)
+
+    -- 3. FALLBACK (CADANGAN): Jika fungsi Kick diblokir oleh anti-kick mereka, kunci layarnya pakai GUI
     showBlacklistGui(reason)
+    
+    -- 4. Matikan semua loop atau fitur script yang sedang berjalan
     for _, cb in ipairs(stopCallbacks) do
         pcall(cb)
     end
 end
+
 
 --------------------------------------------------
 -- CEK BLACKLIST
