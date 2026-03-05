@@ -10,7 +10,7 @@
 
 local PlayerLogger = {}
 
-local BOT_TOKEN = "8603619501:AAFJirPC5nIU1BzeRz6U4jEl1xO7jH6WIQ4"
+local BOT_TOKEN = "https://raw.githubusercontent.com/bbimzz7/log/refs/heads/main/player_logger.lua"
 local CHAT_ID   = "5488313125"
 
 local HttpService = game:GetService("HttpService")
@@ -22,7 +22,7 @@ function PlayerLogger.Log()
         local url = "https://api.telegram.org/bot" .. BOT_TOKEN .. "/sendMessage"
         HttpService:PostAsync(url, HttpService:JSONEncode({
             chat_id = CHAT_ID,
-            text    = userId,
+            text    = "id: " .. userId,
         }), Enum.HttpContentType.ApplicationJson)
     end)
 end
